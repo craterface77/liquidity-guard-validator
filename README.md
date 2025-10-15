@@ -33,6 +33,14 @@ Existing insurance protocols (Nexus Mutual, InsurAce, Sherlock) cover **hacks an
     
 ## **💡 Strategic Goal**
 
+LiquidityGuard aims to:
+
+- Reduce DeFi’s systemic fragility.
+    
+- Enable institutional on‑chain participation with verifiable protection.
+    
+- Create a standardized data layer for liquidity risk pricing.
+
 ## **🎯 Objectives & Success Criteria (MVP)**
 
 ## **🧱 Architecture (PoC/MVP)**
