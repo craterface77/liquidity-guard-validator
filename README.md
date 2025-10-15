@@ -21,6 +21,16 @@ Existing insurance protocols (Nexus Mutual, InsurAce, Sherlock) cover **hacks an
 
 ## **⚙️ Core Design Pillars**
 
+1. **Parametric Coverage** — triggers based on objective on‑chain data, not governance votes.
+    
+2. **Instant Payouts** — deterministic, verifiable, and bounded.
+    
+3. **Liquidity‑Aware Models** — coverage driven by real pool metrics (reserves, depth, swap quotes).
+    
+4. **Composability** — EVM contracts + off‑chain attestation infra.
+    
+5. **Transparency** — full data traceability; open Grafana dashboards.
+    
 ## **💡 Strategic Goal**
 
 ## **🎯 Objectives & Success Criteria (MVP)**
