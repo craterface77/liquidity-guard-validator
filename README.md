@@ -43,6 +43,14 @@ LiquidityGuard aims to:
 
 ## **🎯 Objectives & Success Criteria (MVP)**
 
+- **Demonstrate automatic parametric payout** on a reproduced USDf event (mainnet‑fork) for a Curve pool.
+    
+- **Ship a minimal partner‑ready stack**: on‑chain contracts + off‑chain Risk Engine + Attestation + Keeper + Dashboard.
+    
+- **Provide a plug‑and‑play integration path** for Curve (widget + SDK + API + PartnerRegistry contract).
+    
+- **Time‑box:** 2–3 weeks focused build (solo dev feasible).
+
 ## **🧱 Architecture (PoC/MVP)**
 
 ## **🧰 Tech Stack**
