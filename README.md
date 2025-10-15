@@ -76,4 +76,14 @@ Curve / dApp Widget ├─ SDK/API ───┤
 ```
 
 ## **🧰 Tech Stack**
-
+- **Solidity & Tests:** Foundry (forge/anvil), OpenZeppelin, Viem (scripts).
+    
+- **Node/TS:** viem, ethers, clickhouse, zod, fastify.
+    
+- **Data:** ClickHouse, Docker Compose, optional Redis for queues.
+    
+- **Dashboards:** Grafana (Docker), alerting to PagerDuty/Telegram.
+    
+- **Infra:** Chainstack/Alchemy RPC; Defender/Gelato for keepers.
+    
+- **Keys:** multisig (Safe) for attestor in MVP; rotateable EOA for PoC.
