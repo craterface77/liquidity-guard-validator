@@ -53,5 +53,27 @@ LiquidityGuard aims to:
 
 ## **🧱 Architecture (PoC/MVP)**
 
+```
+User / Protocol UI ─┐             ┌─ Grafana Dashboards
+Curve / dApp Widget ├─ SDK/API ───┤
+                    │             └─ Alerts (PagerDuty/Telegram)
+                    ▼
+             CoverageManager (Solidity)
+               ├─ PolicyNFT (ERC‑721)
+               ├─ InsurancePool (USDC vault)
+               └─ PartnerRegistry (Curve pool listing, budgets)
+                    ▲
+                    │ EIP‑712 Attestation
+                    ▼
+             AttestationVerifier (on‑chain)
+                    ▲
+                    │ signed payloads
+                    ▼
+        Risk Engine + Indexer (TS/Node + ClickHouse)
+          ├─ Curve reserves, UniV3 TWAP, swap simulation
+          ├─ Severity S, thresholds + grace window
+          └─ Keeper (Gelato/Defender/cron) → `settle()`
+```
+
 ## **🧰 Tech Stack**
 
