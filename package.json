@@ -1,26 +1,20 @@
 {
-  "name": "liquidity-shield-eth-hackathon",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name":"liquidityguard-validator",
+  "version":"0.1.0",
+  "type":"module",
+  "scripts":{
+    "start":"ts-node src/index.ts",
+    "fork-test":"ts-node src/scripts/fork-test.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "axios": "^1.12.2",
-    "clickhouse": "^2.6.0",
-    "dotenv": "^17.2.3",
-    "ethers": "^6.15.0",
-    "express": "^5.1.0",
-    "pino": "^10.0.0"
+  "dependencies":{
+    "ethers":"^6.0.0",
+    "fastify":"^4.0.0",
+    "zod":"^3.0.0",
+    "ipfs-http-client":"^60.0.0",
+    "dotenv":"^16.0.0"
   },
-  "devDependencies": {
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.7.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+  "devDependencies":{
+    "ts-node":"^10.0.0",
+    "typescript":"^5.0.0"
   }
 }
