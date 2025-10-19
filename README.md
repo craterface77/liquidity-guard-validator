@@ -76,7 +76,7 @@ Curve / dApp Widget ├─ SDK/API ───┤
 ```
 
 ## **🧰 Tech Stack**
-- **Solidity & Tests:** Foundry (forge/anvil), OpenZeppelin, Viem (scripts).
+- **Solidity & Tests:** Foundry (forge/anvil), OpenZeppelin, Viem (scripts)
     
 - **Node/TS:** viem, ethers, clickhouse, zod, fastify.
     
