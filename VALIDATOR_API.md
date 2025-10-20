@@ -9,9 +9,11 @@ This document describes the API surface and push notifications the backend expec
 All endpoints are assumed to live under `/validator/api`. Responses must be JSON with `Content-Type: application/json`. Authentication should rely on a shared secret (HMAC) or validator ECDSA signatures.
 
 ### 1.1 `GET /v1/risk`
+
 List all risks with current status and telemetry.
 
 **Response**
+
 ```json
 {
   "items": [
@@ -36,12 +38,15 @@ List all risks with current status and telemetry.
 ```
 
 ### 1.2 `GET /v1/risk/{riskId}`
+
 Detailed state for a single risk (same payload as above plus optional history of windows).
 
 ### 1.3 `POST /v1/claims/preview`
+
 Request payout calculation for a policy.
 
 **Request**
+
 ```json
 {
   "policy": {
@@ -66,6 +71,7 @@ Request payout calculation for a policy.
 ```
 
 **Response**
+
 ```json
 {
   "riskId": "0x...",
@@ -91,15 +97,22 @@ Request payout calculation for a policy.
 ```
 
 ### 1.4 `POST /v1/claims/sign`
+
 Returns EIP-712 payload and signature for the payout.
 
 **Response**
+
 ```json
 {
   "policyId": "1",
   "riskId": "0x...",
   "typedData": {
-    "domain": { "name": "LiquidityGuardPayout", "version": "1", "chainId": 1, "verifyingContract": "0xPayoutModule" },
+    "domain": {
+      "name": "LiquidityGuardPayout",
+      "version": "1",
+      "chainId": 1,
+      "verifyingContract": "0xPayoutModule"
+    },
     "types": {
       "ClaimPayload": [
         { "name": "policyId", "type": "uint256" },
@@ -132,9 +145,7 @@ Returns EIP-712 payload and signature for the payout.
   "calc": {
     "snapshots": { "startCid": "bafy...", "endCid": "bafy..." },
     "twap": { "start": "0.94", "end": "0.99" },
-    "proofs": [
-      { "label": "curveSnapshot", "link": "ipfs://bafy..." }
-    ]
+    "proofs": [{ "label": "curveSnapshot", "link": "ipfs://bafy..." }]
   }
 }
 ```
@@ -146,7 +157,9 @@ Returns EIP-712 payload and signature for the payout.
 Validator should POST signed JSON payloads to backend webhooks (e.g. `/internal/validator/...`). Each webhook must include an idempotency `eventId` and validator signature.
 
 ### 2.1 Depeg window events
+
 `POST /internal/validator/anchors`
+
 ```json
 {
   "type": "DEPEG_START",
@@ -158,9 +171,11 @@ Validator should POST signed JSON payloads to backend webhooks (e.g. `/internal/
   "signature": "0xvalidatorSig"
 }
 ```
+
 Analogous payload for `DEPEG_END`.
 
 ### 2.2 Depeg liquidation evidence
+
 ```json
 {
   "type": "DEPEG_LIQ",
@@ -178,7 +193,9 @@ Analogous payload for `DEPEG_END`.
 ```
 
 ### 2.3 Pool state updates
+
 `POST /internal/validator/pool-state`
+
 ```json
 {
   "riskId": "0x...",
@@ -195,6 +212,7 @@ Analogous payload for `DEPEG_END`.
 ```
 
 ### 2.4 Optional: premium quotes
+
 If the validator is the source of pricing, it can push quotes via `/internal/validator/quote` with fields such as `premiumUsd`, `coverageCapUsd`, `deductibleBps`, etc., signed by validator key.
 
 ---

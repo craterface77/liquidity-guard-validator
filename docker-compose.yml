@@ -2,7 +2,6 @@ version: "3.8"
 services:
   clickhouse:
     image: yandex/clickhouse-server:latest
-    container_name: clickhouse
     ports:
       - "8123:8123"
       - "9000:9000"
@@ -17,3 +16,33 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - clickhouse
+
+  validator-indexer:
+    build: .
+    command: ["npm", "run", "start:indexer"]
+    volumes:
+      - validator-data:/app/data
+    env_file:
+      - ./.env
+    environment:
+      - RPC_URL=${RPC_URL}
+      - POLL_INTERVAL_MS=${POLL_INTERVAL_MS:-10000}
+    depends_on:
+      - clickhouse
+
+  validator-api:
+    build: .
+    command: ["npm", "run", "start:api"]
+    volumes:
+      - validator-data:/app/data
+    env_file:
+      - ./.env
+    environment:
+      - PORT=${PORT:-3000}
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      - validator-indexer
+
+volumes:
+  validator-data:
