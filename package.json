@@ -1,10 +1,17 @@
 {
-  "name": "liquidity-shield-eth-hackathon",
+  "name": "liquidity-guard-validator",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "main": "./dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.json",
+    "dev:api": "node --loader ts-node/esm src/services/api.ts",
+    "dev:indexer": "node --loader ts-node/esm src/services/indexer.ts",
+    "dev:fork-test": "node --loader ts-node/esm src/scripts/fork-test.ts",
+    "start:api": "node ./dist/services/api.js",
+    "start:indexer": "node ./dist/services/indexer.js",
+    "test": "echo \"No automated tests defined\" && exit 0"
   },
   "keywords": [],
   "author": "",
