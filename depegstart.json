@@ -1,0 +1,11 @@
+{
+  "event": "DEPEG_START",
+  "eventId": "evt-20250708-curve-usdc-usdf-0001",
+  "riskId": "risk-20250708-curve-usdc-usdf-0001",
+  "poolId": "chain:0xPoolAddr",
+  "windowStart": "2025-07-08T01:22:00Z",
+  "metrics": { "r_bps": 2400, "lossQuoteBps": 75, "twap30mBps": 9800 },
+  "snapshotCid": "bafy...",
+  "signer": "0xAttestor",
+  "signedAt": "2025-07-08T01:30:00Z"
+}
