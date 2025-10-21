@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "riskId": "risk-20250708-curve-usdc-usdf-0001",
+      "poolId": "chain:0xPoolAddress",
+      "type": "DEPEG_LIQ",            // DEPEG_LIQ | DEPEG_START | DEPEG_END | LIQ_UID
+      "state": "OPEN",                // OPEN | RESOLVED | ARCHIVED
+      "window": { "start": "2025-07-08T01:22:00Z", "end": null },
+      "metrics": {
+        "r_bps": 2400,                // reserve ratio in bps (r*1e4)
+        "lossQuoteBps": 75,           // swap-based loss in bps e.g. 0.75%
+        "twap30mBps": 9800            // 0.98 => 9800 (1e4)
+      },
+      "samplesCount": 123,
+      "firstSeenBlock": 18000000,
+      "lastUpdatedAt": "2025-07-08T01:40:00Z"
+    }
+  ],
+  "cursor": "opaque-next-cursor"
+}
