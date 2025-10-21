@@ -1,89 +1,34 @@
-# liquidity-guard
-🛡️**LiquidityGuard** is a next‑generation DeFi insurance layer designed to protect users, protocols, and institutional capital from _unintended capital loss_ caused by liquidity crises, oracle glitches, and short‑term depeg events.
+## What is included
+- `server.ts` — Fastify server and route handlers (GET list + GET detail)
+- `package.json` — deps + scripts
+- `tsconfig.json` — TypeScript config
+- `clickhouse/migrations/001_create_tables.sql` — ClickHouse schema for `pool_samples` and `risk_events`
+- `docker-compose.yml` — ClickHouse + API service (dev)
+- `scripts/seed_samples.ts` — small script to insert demo samples and a risk_event
+- `tests/api.test.ts` — jest + supertest integration tests (connects to ClickHouse)
+- `.env.example` — environment var template
 
-## **🚨 The Problem**
-DeFi has matured — yields are real, TVL is massive, and stablecoins dominate the ecosystem. Yet the biggest risks are no longer smart‑contract bugs; they are **systemic and invisible**
-- Liquidity pools drain within minutes, trapping capital (as with Falcon USDf)    
-- Oracles misreport, causing unfair liquidations    
-- Stablecoins briefly lose peg but recover — yet users are liquidated or suffer impermanent loss before that
-Existing insurance protocols (Nexus Mutual, InsurAce, Sherlock) cover **hacks and code exploits**, not **economic anomalies**. In 2025, liquidity and oracle faults have become the new black swans.
-
-## **👤 Who It’s For**
-|**DeFi Yield Farmers**|Want to farm stable yields safely without sudden lockups|Coverage auto‑pays if exit cost > threshold|
-
-|**Institutions & DAOs**|Allocate 6–8‑figure positions into DeFi pools|Capital protection & audit‑grade transparency|
-
-|**DeFi Protocols (Aave, Pendle, Curve)**|Want user confidence & stickier TVL|Integrate LiquidityGuard as “opt‑in protection” button|
-
-|**Stablecoin Issuers**|Need market‑trust layer|Co‑sponsor insurance pool to prove resilience|
-
-|**AA Wallet Users**|Expect plug‑and‑play safety|Add protection via hook or paymaster automatically|
-
-## **⚙️ Core Design Pillars**
-
-1. **Parametric Coverage** — triggers based on objective on‑chain data, not governance votes.
-    
-2. **Instant Payouts** — deterministic, verifiable, and bounded.
-    
-3. **Liquidity‑Aware Models** — coverage driven by real pool metrics (reserves, depth, swap quotes).
-    
-4. **Composability** — EVM contracts + off‑chain attestation infra.
-    
-5. **Transparency** — full data traceability; open Grafana dashboards.
-    
-## **💡 Strategic Goal**
-
-LiquidityGuard aims to:
-
-- Reduce DeFi’s systemic fragility.
-    
-- Enable institutional on‑chain participation with verifiable protection.
-    
-- Create a standardized data layer for liquidity risk pricing.
-
-## **🎯 Objectives & Success Criteria (MVP)**
-
-- **Demonstrate automatic parametric payout** on a reproduced USDf event (mainnet‑fork) for a Curve pool.
-    
-- **Ship a minimal partner‑ready stack**: on‑chain contracts + off‑chain Risk Engine + Attestation + Keeper + Dashboard.
-    
-- **Provide a plug‑and‑play integration path** for Curve (widget + SDK + API + PartnerRegistry contract).
-    
-- **Time‑box:** 2–3 weeks focused build (solo dev feasible).
-
-## **🧱 Architecture (PoC/MVP)**
-
-```
-User / Protocol UI ─┐             ┌─ Grafana Dashboards
-Curve / dApp Widget ├─ SDK/API ───┤
-                    │             └─ Alerts (PagerDuty/Telegram)
-                    ▼
-             CoverageManager (Solidity)
-               ├─ PolicyNFT (ERC‑721)
-               ├─ InsurancePool (USDC vault)
-               └─ PartnerRegistry (Curve pool listing, budgets)
-                    ▲
-                    │ EIP‑712 Attestation
-                    ▼
-             AttestationVerifier (on‑chain)
-                    ▲
-                    │ signed payloads
-                    ▼
-        Risk Engine + Indexer (TS/Node + ClickHouse)
-          ├─ Curve reserves, UniV3 TWAP, swap simulation
-          ├─ Severity S, thresholds + grace window
-          └─ Keeper (Gelato/Defender/cron) → `settle()`
-```
-
-## **🧰 Tech Stack**
-- **Solidity & Tests:** Foundry (forge/anvil), OpenZeppelin, Viem (scripts)
-    
-- **Node/TS:** viem, ethers, clickhouse, zod, fastify.
-    
-- **Data:** ClickHouse, Docker Compose, optional Redis for queues.
-    
-- **Dashboards:** Grafana (Docker), alerting to PagerDuty/Telegram.
-    
-- **Infra:** Chainstack/Alchemy RPC; Defender/Gelato for keepers.
-    
-- **Keys:** multisig (Safe) for attestor in MVP; rotateable EOA for PoC.
+## Quick start (dev)
+1. Copy files into a new folder.
+2. Create a `.env` based on `.env.example` and update `CLICKHOUSE_URL` if needed.
+3. Start ClickHouse (via docker-compose):
+   ```bash
+   docker-compose up -d clickhouse
+   ```
+4. Run ClickHouse migrations (use clickhouse client or HTTP insert):
+   ```bash
+   docker exec -it <clickhouse-container> bash
+   clickhouse-client --multiquery < /migrations/001_create_tables.sql
+   ```
+5. Install deps & start the API:
+   ```bash
+   npm install
+   npm run dev
+   ```
+6. Seed demo data:
+   ```bash
+   npm run seed
+   ```
+7. Test endpoints:
+   - `GET http://localhost:3000/validator/api/v1/risk`
+   - `GET http://localhost:3000/validator/api/v1/risk/<risk_id>`
