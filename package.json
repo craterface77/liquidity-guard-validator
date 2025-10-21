@@ -1,26 +1,29 @@
+```json
 {
-  "name": "liquidity-shield-eth-hackathon",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "validator-risk-api",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "seed": "ts-node scripts/seed_samples.ts",
+    "test": "jest --runInBand"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "axios": "^1.12.2",
-    "clickhouse": "^2.6.0",
-    "dotenv": "^17.2.3",
-    "ethers": "^6.15.0",
-    "express": "^5.1.0",
-    "pino": "^10.0.0"
+    "@clickhouse/client": "^2.0.0",
+    "fastify": "^4.0.0",
+    "@fastify/cors": "^8.0.0",
+    "zod": "^3.0.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.7.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "ts-node": "^10.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "supertest": "^6.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/supertest": "^2.0.0"
   }
 }
