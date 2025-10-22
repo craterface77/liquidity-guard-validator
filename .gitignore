@@ -1,0 +1,23 @@
+# Node / TypeScript
+node_modules/
+dist/
+clickhouse-data/
+
+# Environment files
+.env
+
+# Logs & temp
+*.log
+*.tmp
+
+# IDE / Editor
+.idea/
+.vscode/
+
+# OS artifacts
+.DS_Store
+
+# Data outputs
+data/
+clickhouse-data/
+coverage/

@@ -1,29 +1,63 @@
-version: '3.7'
+version: '3.8'
+
 services:
   clickhouse:
     image: clickhouse/clickhouse-server:23.6
-    container_name: clickhouse
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    volumes:
-      - ./clickhouse:/migrations
-    ports:
-      - "8123:8123"
-      - "9000:9000"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  api:
-    build: .
-    image: validator-risk-api:local
+    container_name: lg-clickhouse
+    platform: linux/amd64
     environment:
-      - CLICKHOUSE_URL=${CLICKHOUSE_URL}
-    depends_on:
-      - clickhouse
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+    volumes:
+      - ./clickhouse-data:/var/lib/clickhouse
     ports:
-      - "3000:3000"
+      - '8123:8123'
+      - '9000:9000'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8123/ping']
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
+  migrate:
+    build: .
+    command: ['node', 'dist/scripts/migrate.js']
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    environment:
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+    restart: 'no'
+
+  validator-api:
+    build: .
+    command: ['sh', '-c', 'node dist/src/server.js']
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+    ports:
+      - '3000:3000'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  validator-indexer:
+    build: .
+    command: ['sh', '-c', 'node dist/src/workers/indexer.js']
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
