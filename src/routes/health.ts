@@ -1,22 +1,22 @@
-import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import fp from 'fastify-plugin';
-import { clickhouseQuery } from '../db/clickhouse';
-import { env } from '../config/env';
+import type { FastifyInstance, FastifyPluginOptions } from "fastify";
+import fp from "fastify-plugin";
+import { clickhouseQuery } from "../db/clickhouse";
+import { env } from "../config/env";
 
 async function healthPlugin(app: FastifyInstance, _opts: FastifyPluginOptions) {
-  app.get('/', async () => {
+  app.get("/", async () => {
     try {
-      await clickhouseQuery({ query: 'SELECT 1' });
+      await clickhouseQuery({ query: "SELECT 1" });
       return { ok: true };
     } catch (error) {
       return { ok: false, error: (error as Error).message };
     }
   });
 
-  app.get('/health', async (request, reply) => {
+  app.get("/health", async (request, reply) => {
     try {
       // Check ClickHouse connectivity
-      await clickhouseQuery({ query: 'SELECT 1' });
+      await clickhouseQuery({ query: "SELECT 1" });
 
       // Get latest sample
       const [latestSample] = await clickhouseQuery<{
@@ -70,11 +70,13 @@ async function healthPlugin(app: FastifyInstance, _opts: FastifyPluginOptions) {
       });
 
       const now = Date.now();
-      const lastSampleAge = latestSample ? now - new Date(latestSample.ts).getTime() : null;
+      const lastSampleAge = latestSample
+        ? now - new Date(latestSample.ts).getTime()
+        : null;
       const isHealthy = lastSampleAge ? lastSampleAge < 5 * 60 * 1000 : false; // 5 minutes
 
       return reply.send({
-        status: isHealthy ? 'healthy' : 'stale',
+        status: isHealthy ? "healthy" : "stale",
         timestamp: new Date().toISOString(),
         config: {
           poolId: env.POOL_ID,
@@ -107,7 +109,7 @@ async function healthPlugin(app: FastifyInstance, _opts: FastifyPluginOptions) {
       });
     } catch (error) {
       return reply.status(503).send({
-        status: 'error',
+        status: "error",
         error: (error as Error).message,
       });
     }

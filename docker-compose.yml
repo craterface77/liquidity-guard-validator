@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   clickhouse:
@@ -11,10 +11,10 @@ services:
     volumes:
       - ./clickhouse-data:/var/lib/clickhouse
     ports:
-      - '8123:8123'
-      - '9000:9000'
+      - "8123:8123"
+      - "9000:9000"
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8123/ping']
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
       interval: 15s
       timeout: 10s
       retries: 20
@@ -22,7 +22,7 @@ services:
 
   migrate:
     build: .
-    command: ['node', 'dist/scripts/migrate.js']
+    command: ["node", "dist/scripts/migrate.js"]
     depends_on:
       clickhouse:
         condition: service_healthy
@@ -30,27 +30,29 @@ services:
       CLICKHOUSE_URL: http://clickhouse:8123
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
-    restart: 'no'
+    restart: "no"
 
   validator-api:
     build: .
-    command: ['sh', '-c', 'node dist/src/server.js']
+    command: ["node", "dist/src/server.js"]
     env_file:
       - .env
     environment:
       NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
       CLICKHOUSE_URL: http://clickhouse:8123
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
     ports:
-      - '3000:3000'
+      - "3001:3000"
     depends_on:
       migrate:
         condition: service_completed_successfully
 
   validator-indexer:
     build: .
-    command: ['sh', '-c', 'node dist/src/workers/indexer.js']
+    command: ["sh", "-c", "node dist/src/workers/indexer.js"]
     env_file:
       - .env
     environment:

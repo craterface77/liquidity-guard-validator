@@ -1,0 +1,17 @@
+# Envio generated files
+generated/
+.envio/
+abis/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store

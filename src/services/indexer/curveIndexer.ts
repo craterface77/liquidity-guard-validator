@@ -1,21 +1,26 @@
-import { JsonRpcProvider, Contract, Interface, formatUnits, parseUnits, type FunctionFragment } from 'ethers';
-import { env } from '../../config/env';
-import { withRetry } from '../../lib/retry';
+import {
+  JsonRpcProvider,
+  Contract,
+  Interface,
+  formatUnits,
+  parseUnits,
+  type FunctionFragment,
+} from "ethers";
+import { env } from "../../config/env";
+import { withRetry } from "../../lib/retry";
 
 const POOL_ABI = [
-  'function balances(uint256) view returns (uint256)',
-  'function coins(uint256) view returns (address)',
-  'function totalSupply() view returns (uint256)',
+  "function balances(uint256) view returns (uint256)",
+  "function coins(uint256) view returns (address)",
+  "function totalSupply() view returns (uint256)",
 ];
 
-const ERC20_ABI = [
-  'function decimals() view returns (uint8)',
-];
+const ERC20_ABI = ["function decimals() view returns (uint8)"];
 
 const GET_DY_SIGNATURES = [
-  'function get_dy(int128,int128,uint256) view returns (uint256)',
-  'function get_dy(int256,int256,uint256) view returns (uint256)',
-  'function get_dy_underlying(int128,int128,uint256) view returns (uint256)',
+  "function get_dy(int128,int128,uint256) view returns (uint256)",
+  "function get_dy(int256,int256,uint256) view returns (uint256)",
+  "function get_dy_underlying(int128,int128,uint256) view returns (uint256)",
 ];
 
 export interface PoolSample {
@@ -40,22 +45,22 @@ export class CurveIndexer {
     const blockNumber = await withRetry(
       () => this.provider.getBlockNumber(),
       {},
-      { operation: 'getBlockNumber' },
+      { operation: "getBlockNumber" }
     );
 
     const block = await withRetry(
       () => this.provider.getBlock(blockNumber),
       {},
-      { operation: 'getBlock', blockNumber },
+      { operation: "getBlock", blockNumber }
     );
 
     if (!block) {
-      throw new Error('block_not_found');
+      throw new Error("block_not_found");
     }
 
-    const coinsFn = this.pool.getFunction('coins');
-    const balancesFn = this.pool.getFunction('balances');
-    const totalSupplyFn = this.pool.getFunction('totalSupply');
+    const coinsFn = this.pool.getFunction("coins");
+    const balancesFn = this.pool.getFunction("balances");
+    const totalSupplyFn = this.pool.getFunction("totalSupply");
 
     const [coin0, coin1] = await Promise.all([coinsFn(0), coinsFn(1)]);
 
@@ -76,7 +81,8 @@ export class CurveIndexer {
 
     // Calculate price using get_dy for accurate pricing
     const price = await this.getExchangeRate(dec0, dec1);
-    const rRatio = reserve0 + reserve1 === 0 ? 0 : reserve0 / (reserve0 + reserve1);
+    const rRatio =
+      reserve0 + reserve1 === 0 ? 0 : reserve0 / (reserve0 + reserve1);
     const rBps = Math.round(rRatio * 10_000);
 
     this.sampleBuffer.push({ ts: block.timestamp, price });
@@ -103,7 +109,7 @@ export class CurveIndexer {
   private async getTokenDecimals(address: string) {
     const token = new Contract(address, ERC20_ABI, this.provider);
     try {
-      const decimalsFn = token.getFunction('decimals');
+      const decimalsFn = token.getFunction("decimals");
       const decimals = await decimalsFn();
       return Number(decimals);
     } catch (error) {
@@ -117,13 +123,14 @@ export class CurveIndexer {
     if (window.length === 0) {
       return 10_000; // 1.0
     }
-    const avg = window.reduce((acc, sample) => acc + sample.price, 0) / window.length;
+    const avg =
+      window.reduce((acc, sample) => acc + sample.price, 0) / window.length;
     return Math.round(avg * 10_000);
   }
 
   private async getExchangeRate(dec0: number, dec1: number): Promise<number> {
     // Get price: how much coin1 (QUOTE/USDC) for 1 unit of coin0 (BASE/USDF)
-    const oneUnit = parseUnits('1', dec0);
+    const oneUnit = parseUnits("1", dec0);
 
     for (const signature of GET_DY_SIGNATURES) {
       const iface = new Interface([signature]);

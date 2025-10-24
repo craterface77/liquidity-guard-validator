@@ -1,6 +1,6 @@
-import { Buffer } from 'buffer';
-import { clickhouseQuery } from '../db/clickhouse';
-import { toDateTimeString } from '../lib/time';
+import { Buffer } from "buffer";
+import { clickhouseQuery } from "../db/clickhouse";
+import { toDateTimeString } from "../lib/time";
 
 export interface RiskListItem {
   riskId: string;
@@ -98,11 +98,13 @@ interface DetailMetricsRow {
 }
 
 function encodeCursor(attestedAt: string, riskId: string) {
-  return Buffer.from(JSON.stringify({ attestedAt, riskId })).toString('base64url');
+  return Buffer.from(JSON.stringify({ attestedAt, riskId })).toString(
+    "base64url"
+  );
 }
 
 function decodeCursor(cursor: string) {
-  return JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8')) as {
+  return JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")) as {
     attestedAt: string;
     riskId: string;
   };
@@ -135,7 +137,11 @@ export async function listRisks({
         version
       FROM liquidityguard.risk_events FINAL
       WHERE 1
-        ${decodedCursor ? 'AND (attested_at < toDateTime64({cursorAttestedAt:String}, 3) OR (attested_at = toDateTime64({cursorAttestedAt:String}, 3) AND risk_id < {cursorRiskId:String}))' : ''}
+        ${
+          decodedCursor
+            ? "AND (attested_at < toDateTime64({cursorAttestedAt:String}, 3) OR (attested_at = toDateTime64({cursorAttestedAt:String}, 3) AND risk_id < {cursorRiskId:String}))"
+            : ""
+        }
       ORDER BY attested_at DESC, risk_id DESC
       LIMIT {limit:UInt32}
     `,
@@ -157,13 +163,15 @@ export async function listRisks({
 
     items.push({
       riskId: row.risk_id,
-      product: row.risk_type || 'DEPEG_LP',
+      product: row.risk_type || "DEPEG_LP",
       poolId: row.pool_id,
       state: row.risk_state,
       updatedAt: Math.floor(new Date(row.updated_at).getTime() / 1000),
       latestWindow: {
         S: Math.floor(new Date(row.window_start).getTime() / 1000),
-        E: row.window_end ? Math.floor(new Date(row.window_end).getTime() / 1000) : null,
+        E: row.window_end
+          ? Math.floor(new Date(row.window_end).getTime() / 1000)
+          : null,
       },
       metrics: {
         twap1h: formatBps(metrics.twap1h),
@@ -176,7 +184,10 @@ export async function listRisks({
 
   const lastRow = rows[rows.length - 1];
   if (hasMore && lastRow) {
-    return { items, cursor: encodeCursor(lastRow.attested_at, lastRow.risk_id) };
+    return {
+      items,
+      cursor: encodeCursor(lastRow.attested_at, lastRow.risk_id),
+    };
   }
   return { items };
 }
@@ -213,7 +224,9 @@ async function fetchListMetrics(row: RiskRow): Promise<MetricsRow> {
   );
 }
 
-export async function getRiskDetail(riskId: string): Promise<RiskDetail | null> {
+export async function getRiskDetail(
+  riskId: string
+): Promise<RiskDetail | null> {
   const rows = await clickhouseQuery<RiskRow>({
     query: `
       SELECT
@@ -317,7 +330,7 @@ export async function getRiskDetail(riskId: string): Promise<RiskDetail | null> 
   return {
     riskId: row.risk_id,
     poolId: row.pool_id,
-    product: row.risk_type || 'DEPEG_LP',
+    product: row.risk_type || "DEPEG_LP",
     state: row.risk_state,
     window: {
       start: new Date(row.window_start).toISOString(),
@@ -347,7 +360,7 @@ export async function getRiskDetail(riskId: string): Promise<RiskDetail | null> 
     })),
     attestations: attestations.map((a) => ({
       attId: a.attestation_id,
-      type: 'DEPEG_ATTEST',
+      type: "DEPEG_ATTEST",
       signer: a.signer,
       signature: a.signature,
       payload: parseJSON(a.payload),
@@ -358,12 +371,12 @@ export async function getRiskDetail(riskId: string): Promise<RiskDetail | null> 
 }
 
 function formatBps(value: number | null) {
-  if (value == null) return '0.0000';
+  if (value == null) return "0.0000";
   return (value / 10_000).toFixed(4);
 }
 
 function formatUsd(value: number | null) {
-  if (value == null) return '0.00';
+  if (value == null) return "0.00";
   return value.toFixed(2);
 }
 

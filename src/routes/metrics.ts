@@ -1,8 +1,8 @@
-import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import fp from 'fastify-plugin';
-import { z } from 'zod';
-import { clickhouseQuery } from '../db/clickhouse';
-import { env } from '../config/env';
+import type { FastifyInstance, FastifyPluginOptions } from "fastify";
+import fp from "fastify-plugin";
+import { z } from "zod";
+import { clickhouseQuery } from "../db/clickhouse";
+import { env } from "../config/env";
 
 const metricsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(10000).default(1000),
@@ -10,14 +10,19 @@ const metricsQuerySchema = z.object({
   to: z.coerce.number().int().optional(),
 });
 
-async function metricsPlugin(app: FastifyInstance, _opts: FastifyPluginOptions) {
-  app.get('/metrics', async (request, reply) => {
+async function metricsPlugin(
+  app: FastifyInstance,
+  _opts: FastifyPluginOptions
+) {
+  app.get("/metrics", async (request, reply) => {
     const query = metricsQuerySchema.parse(request.query);
 
     const fromCondition = query.from
       ? `AND ts >= toDateTime64({from:UInt64}, 3)`
-      : '';
-    const toCondition = query.to ? `AND ts <= toDateTime64({to:UInt64}, 3)` : '';
+      : "";
+    const toCondition = query.to
+      ? `AND ts <= toDateTime64({to:UInt64}, 3)`
+      : "";
 
     const samples = await clickhouseQuery<{
       ts: string;
@@ -75,13 +80,15 @@ async function metricsPlugin(app: FastifyInstance, _opts: FastifyPluginOptions) 
     });
   });
 
-  app.get('/metrics/chart', async (request, reply) => {
+  app.get("/metrics/chart", async (request, reply) => {
     const query = metricsQuerySchema.parse(request.query);
 
     const fromCondition = query.from
       ? `AND ts >= toDateTime64({from:UInt64}, 3)`
-      : '';
-    const toCondition = query.to ? `AND ts <= toDateTime64({to:UInt64}, 3)` : '';
+      : "";
+    const toCondition = query.to
+      ? `AND ts <= toDateTime64({to:UInt64}, 3)`
+      : "";
 
     const samples = await clickhouseQuery<{
       ts: string;

@@ -1,0 +1,150 @@
+# LiquidityGuard GraphQL Schema for Envio
+
+type Policy @entity {
+  id: ID! # policyId as string
+  policyId: BigInt!
+  owner: Bytes! # address
+  riskId: Bytes! # bytes32
+  insuredAmount: BigInt!
+  coverageCap: BigInt!
+  deductibleBps: Int!
+  startAt: BigInt! # timestamp
+  activeAt: BigInt # timestamp when activated
+  endAt: BigInt! # timestamp
+  status: PolicyStatus!
+  product: String! # "DEPEG_LP" or "AAVE_DLP"
+  premium: BigInt!
+  claims: [Claim!]! @derivedFrom(field: "policy")
+  createdAt: BigInt! # block timestamp
+  updatedAt: BigInt! # block timestamp
+  txHash: Bytes! # transaction hash
+}
+
+enum PolicyStatus {
+  MINTED
+  ACTIVE
+  EXPIRED
+  CLAIMED
+}
+
+type Claim @entity {
+  id: ID! # claimId as string
+  policy: Policy!
+  policyId: BigInt!
+  beneficiary: Bytes! # address
+  payout: BigInt!
+  status: ClaimStatus!
+  executedAt: BigInt # timestamp
+  failureReason: String
+  txHash: Bytes!
+}
+
+enum ClaimStatus {
+  PENDING
+  EXECUTED
+  FAILED
+}
+
+type PolicyHolder @entity {
+  id: ID! # address as string
+  address: Bytes!
+  policies: [Policy!]! @derivedFrom(field: "owner")
+  totalPolicies: Int!
+  activePolicies: Int!
+  totalInsured: BigInt!
+  totalPremiumPaid: BigInt!
+  totalPayoutsReceived: BigInt!
+  firstPolicyAt: BigInt!
+  lastPolicyAt: BigInt!
+}
+
+type RiskPool @entity {
+  id: ID! # riskId as string
+  riskId: Bytes!
+  name: String!
+  product: String! # "DEPEG_LP" or "AAVE_DLP"
+  chainId: Int!
+  totalPolicies: Int!
+  activePolicies: Int!
+  totalInsured: BigInt!
+  totalPremiums: BigInt!
+  totalPayouts: BigInt!
+  policies: [Policy!]! @derivedFrom(field: "riskId")
+}
+
+type ReserveDeposit @entity {
+  id: ID! # txHash-logIndex
+  user: Bytes!
+  amount: BigInt! # USDC amount
+  shares: BigInt! # lgUSD shares minted
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+type ReserveWithdrawal @entity {
+  id: ID!
+  user: Bytes!
+  amount: BigInt! # USDC amount
+  shares: BigInt! # lgUSD shares burned
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+type RedemptionQueue @entity {
+  id: ID! # user address + timestamp
+  user: Bytes!
+  shares: BigInt!
+  queuedAt: BigInt! # timestamp
+  status: RedemptionStatus!
+  processedAt: BigInt
+  txHash: Bytes!
+}
+
+enum RedemptionStatus {
+  QUEUED
+  PROCESSED
+  CANCELLED
+}
+
+type GlobalStats @entity {
+  id: ID! # "global"
+  totalPolicies: Int!
+  activePolicies: Int!
+  totalClaims: Int!
+  executedClaims: Int!
+  totalPremiums: BigInt!
+  totalPayouts: BigInt!
+  totalInsured: BigInt!
+  totalReserveDeposits: BigInt!
+  totalReserveWithdrawals: BigInt!
+  uniquePolicyHolders: Int!
+  uniqueRiskPools: Int!
+  lastUpdatedAt: BigInt!
+}
+
+type DailyStats @entity {
+  id: ID! # "YYYY-MM-DD"
+  date: String!
+  policiesMinted: Int!
+  policiesActivated: Int!
+  policiesExpired: Int!
+  claimsExecuted: Int!
+  premiumsCollected: BigInt!
+  payoutsDistributed: BigInt!
+  reserveDeposits: BigInt!
+  reserveWithdrawals: BigInt!
+  timestamp: BigInt!
+}
+
+# Query helpers
+type _Meta_ @entity {
+  id: ID!
+  block: Block!
+}
+
+type Block @entity {
+  id: ID!
+  number: BigInt!
+  timestamp: BigInt!
+  hash: Bytes!
+}

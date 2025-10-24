@@ -1,6 +1,6 @@
-import { createClient, type ClickHouseClient } from '@clickhouse/client';
-import { env } from '../config/env';
-import { logger } from '../lib/logger';
+import { createClient, type ClickHouseClient } from "@clickhouse/client";
+import { env } from "../config/env";
+import { logger } from "../lib/logger";
 
 type QueryArgs = {
   query: string;
@@ -10,7 +10,7 @@ type QueryArgs = {
 type InsertArgs = {
   table: string;
   values: Record<string, unknown>[];
-  format?: 'JSONEachRow';
+  format?: "JSONEachRow";
 };
 
 let client: ClickHouseClient | null = null;
@@ -19,7 +19,7 @@ function getClient() {
   if (client) return client;
   client = createClient({
     url: env.CLICKHOUSE_URL,
-    database: 'liquidityguard',
+    database: "liquidityguard",
     username: env.CLICKHOUSE_USER,
     password: env.CLICKHOUSE_PASSWORD,
     clickhouse_settings: {
@@ -36,7 +36,7 @@ export async function clickhouseQuery<T = Record<string, unknown>>({
   const c = getClient();
   const queryConfig: any = {
     query,
-    format: 'JSONEachRow',
+    format: "JSONEachRow",
   };
   if (params) {
     queryConfig.query_params = params;
@@ -46,7 +46,11 @@ export async function clickhouseQuery<T = Record<string, unknown>>({
   return json as unknown as T[];
 }
 
-export async function clickhouseInsert({ table, values, format = 'JSONEachRow' }: InsertArgs): Promise<void> {
+export async function clickhouseInsert({
+  table,
+  values,
+  format = "JSONEachRow",
+}: InsertArgs): Promise<void> {
   const c = getClient();
   await c.insert({
     table,
@@ -60,7 +64,7 @@ export async function closeClickhouse() {
   try {
     await client.close();
   } catch (error) {
-    logger.warn({ err: error }, 'Failed to close ClickHouse client');
+    logger.warn({ err: error }, "Failed to close ClickHouse client");
   } finally {
     client = null;
   }

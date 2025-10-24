@@ -13,6 +13,9 @@
     "seed": "ts-node scripts/seed.ts",
     "simulate": "ts-node scripts/simulate.ts",
     "showcase": "ts-node scripts/showcase.ts",
+    "demo:oracles": "ts-node scripts/demoOraclesSimple.ts",
+    "demo:envio": "ts-node scripts/demoEnvio.ts",
+    "demo": "npm run demo:oracles && npm run demo:envio",
     "test": "jest --runInBand",
     "test:watch": "jest --watch"
   },
@@ -21,6 +24,8 @@
     "@fastify/cors": "10.0.1",
     "@fastify/helmet": "12.0.1",
     "@fastify/rate-limit": "10.1.1",
+    "@pythnetwork/hermes-client": "^2.0.0",
+    "@pythnetwork/pyth-evm-js": "^2.0.0-alpha2",
     "@web3-storage/w3up-client": "^17.3.0",
     "axios": "1.6.5",
     "date-fns": "2.30.0",

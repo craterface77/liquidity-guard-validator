@@ -13,6 +13,7 @@ clickhouse-data/
 # IDE / Editor
 .idea/
 .vscode/
+.claude/
 
 # OS artifacts
 .DS_Store
@@ -21,3 +22,9 @@ clickhouse-data/
 data/
 clickhouse-data/
 coverage/
+
+# Envio generated files
+envio-indexer/generated/
+envio-indexer/.envio/
+envio-indexer/abis/
+envio-indexer/node_modules/

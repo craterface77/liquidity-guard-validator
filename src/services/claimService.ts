@@ -1,15 +1,15 @@
-import { randomUUID } from 'crypto';
-import { z } from 'zod';
-import { clickhouseInsert, clickhouseQuery } from '../db/clickhouse';
-import { computePayout } from '../lib/payout';
-import { buildClaimTypedData, signClaimTypedData } from '../lib/signing';
-import { env } from '../config/env';
-import { toDateTimeString } from '../lib/time';
-import { keccak256, toUtf8Bytes } from 'ethers';
+import { randomUUID } from "crypto";
+import { z } from "zod";
+import { clickhouseInsert, clickhouseQuery } from "../db/clickhouse";
+import { computePayout } from "../lib/payout";
+import { buildClaimTypedData, signClaimTypedData } from "../lib/signing";
+import { env } from "../config/env";
+import { toDateTimeString } from "../lib/time";
+import { keccak256, toUtf8Bytes } from "ethers";
 
 const policySchema = z.object({
   policyId: z.string(),
-  product: z.enum(['DEPEG_LP']),
+  product: z.enum(["DEPEG_LP", "AAVE_DLP"]),
   riskId: z.string(),
   owner: z.string(),
   insuredAmount: z.string(),
@@ -25,7 +25,7 @@ const policySchema = z.object({
 
 const previewSchema = z.object({
   policy: policySchema,
-  claimMode: z.enum(['FINAL', 'PREVIEW']).default('PREVIEW'),
+  claimMode: z.enum(["FINAL", "PREVIEW"]).default("PREVIEW"),
   timestamp: z.number().int().optional(),
 });
 
@@ -63,10 +63,14 @@ export async function previewClaim(payload: unknown) {
 
   const risk = await fetchRisk(policy.riskId);
   if (!risk) {
-    throw new Error('risk_not_found');
+    throw new Error("risk_not_found");
   }
 
-  const metrics = await fetchRiskMetrics(risk.pool_id, risk.window_start, risk.window_end);
+  const metrics = await fetchRiskMetrics(
+    risk.pool_id,
+    risk.window_start,
+    risk.window_end
+  );
 
   const insuredAmount = BigInt(policy.insuredAmount);
   const coverageCap = BigInt(policy.coverageCap);
@@ -83,7 +87,9 @@ export async function previewClaim(payload: unknown) {
   const coverageCapApplied = payout > coverageCap;
 
   const S = Math.floor(new Date(risk.window_start).getTime() / 1000);
-  const E = risk.window_end ? Math.floor(new Date(risk.window_end).getTime() / 1000) : 0;
+  const E = risk.window_end
+    ? Math.floor(new Date(risk.window_end).getTime() / 1000)
+    : 0;
 
   const response = {
     riskId: policy.riskId,
@@ -92,13 +98,18 @@ export async function previewClaim(payload: unknown) {
     E,
     Lstar: severityBps,
     refValue: policy.insuredAmount,
-    curValue: (insuredAmount - cappedPayout > 0n ? insuredAmount - cappedPayout : 0n).toString(),
+    curValue: (insuredAmount - cappedPayout > 0n
+      ? insuredAmount - cappedPayout
+      : 0n
+    ).toString(),
     payout: cappedPayout.toString(),
     twapStart: formatTwap(metrics.avg_twap_bps),
     twapEnd: formatTwap(metrics.avg_twap_bps),
     snapshots: await fetchSnapshots(policy.riskId),
     inputs: {
-      minHeldBalance: clampBigInt(insuredAmount - BigInt(policy.claimedUpTo)).toString(),
+      minHeldBalance: clampBigInt(
+        insuredAmount - BigInt(policy.claimedUpTo)
+      ).toString(),
       deductibleApplied,
       coverageCapApplied,
     },
@@ -110,20 +121,22 @@ export async function previewClaim(payload: unknown) {
 export async function signClaim(payload: unknown) {
   const input = signSchema.parse(payload);
   if (!env.SIGNER_PRIVATE_KEY) {
-    throw new Error('SIGNER_PRIVATE_KEY not configured');
+    throw new Error("SIGNER_PRIVATE_KEY not configured");
   }
   if (!env.PAYOUT_VERIFIER_ADDRESS) {
-    throw new Error('PAYOUT_VERIFIER_ADDRESS not configured');
+    throw new Error("PAYOUT_VERIFIER_ADDRESS not configured");
   }
 
   const preview = await previewClaim(payload);
   const risk = await fetchRisk(preview.riskId);
   if (!risk) {
-    throw new Error('risk_not_found');
+    throw new Error("risk_not_found");
   }
 
   const nonce = await nextNonce(input.policy.policyId, input.policy.riskId);
-  const deadline = BigInt(input.deadline ?? Math.floor(Date.now() / 1000) + 3600);
+  const deadline = BigInt(
+    input.deadline ?? Math.floor(Date.now() / 1000) + 3600
+  );
 
   const domain = {
     name: "LiquidityGuardPayout",
@@ -203,7 +216,11 @@ async function fetchRisk(riskId: string) {
   return rows[0];
 }
 
-async function fetchRiskMetrics(poolId: string, start: string, rawEnd: string | null): Promise<RiskMetricsRow> {
+async function fetchRiskMetrics(
+  poolId: string,
+  start: string,
+  rawEnd: string | null
+): Promise<RiskMetricsRow> {
   const end = rawEnd ?? toDateTimeString(new Date());
   const rows = await clickhouseQuery<RiskMetricsRow>({
     query: `
@@ -272,7 +289,7 @@ async function nextNonce(policyId: string, riskId: string): Promise<bigint> {
   const next = BigInt(current + 1);
 
   await clickhouseInsert({
-    table: 'liquidityguard.claim_nonces',
+    table: "liquidityguard.claim_nonces",
     values: [
       {
         policy_id: policyId,
@@ -301,7 +318,7 @@ async function persistClaim(params: {
 }) {
   const now = toDateTimeString(new Date());
   await clickhouseInsert({
-    table: 'liquidityguard.claims',
+    table: "liquidityguard.claims",
     values: [
       {
         claim_id: params.claimId,
@@ -315,7 +332,7 @@ async function persistClaim(params: {
         deductible_bps: params.deductibleBps,
         coverage_cap: params.coverageCap.toString(),
         nonce: params.nonce.toString(),
-        state: 'SIGNED',
+        state: "SIGNED",
         created_at: now,
         updated_at: now,
       },
@@ -328,7 +345,7 @@ function toBytes32(value: string): string {
 }
 
 function formatTwap(value: number | null) {
-  if (value == null) return '0.0000';
+  if (value == null) return "0.0000";
   return (value / 10_000).toFixed(4);
 }
 

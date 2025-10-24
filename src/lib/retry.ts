@@ -1,4 +1,4 @@
-import { logger } from './logger';
+import { logger } from "./logger";
 
 export interface RetryConfig {
   maxRetries: number;
@@ -21,7 +21,7 @@ function sleep(ms: number): Promise<void> {
 export async function withRetry<T>(
   fn: () => Promise<T>,
   config: Partial<RetryConfig> = {},
-  context?: Record<string, unknown>,
+  context?: Record<string, unknown>
 ): Promise<T> {
   const cfg = { ...DEFAULT_CONFIG, ...config };
   let lastError: Error | null = null;
@@ -41,7 +41,7 @@ export async function withRetry<T>(
             maxRetries: cfg.maxRetries,
             err: lastError,
           },
-          'retry_exhausted',
+          "retry_exhausted"
         );
         throw lastError;
       }
@@ -54,7 +54,7 @@ export async function withRetry<T>(
           nextDelayMs: delay,
           err: lastError,
         },
-        'retry_attempt',
+        "retry_attempt"
       );
 
       await sleep(delay);

@@ -1,0 +1,18 @@
+{
+  "name": "liquidity-guard-indexer",
+  "version": "1.0.0",
+  "description": "Envio HyperIndex for LiquidityGuard insurance protocol",
+  "private": true,
+  "scripts": {
+    "dev": "envio dev",
+    "codegen": "envio codegen",
+    "test": "envio test",
+    "deploy": "envio deploy"
+  },
+  "dependencies": {
+    "@envio-dev/envio": "^2.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

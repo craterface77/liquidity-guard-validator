@@ -7,7 +7,12 @@ export interface PayoutInput {
 
 const BPS_BASE = 10_000n;
 
-export function computePayout({ policyCoverage, kBps, dedBps, lossQuoteBps }: PayoutInput): bigint {
+export function computePayout({
+  policyCoverage,
+  kBps,
+  dedBps,
+  lossQuoteBps,
+}: PayoutInput): bigint {
   const severity = BigInt(Math.max(lossQuoteBps - dedBps, 0));
   if (severity === 0n) {
     return 0n;

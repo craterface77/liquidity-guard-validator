@@ -1,0 +1,89 @@
+# Envio HyperIndex Configuration for LiquidityGuard
+# Indexes PolicyDistributor and PayoutModule events
+
+name: liquidity-guard
+description: Real-time indexer for LiquidityGuard insurance protocol
+version: 1.0.0
+
+networks:
+  - id: 11155111 # Sepolia testnet
+    start_block: 0
+    contracts:
+      - name: PolicyDistributor
+        address:
+          - "0x0000000000000000000000000000000000000000" # Replace with actual address
+        handler: src/handlers/policyDistributor.ts
+        events:
+          - event: "PolicyMinted(uint256 indexed policyId, address indexed owner, bytes32 indexed riskId, uint256 insuredAmount, uint256 coverageCap, uint256 startAt, uint256 endAt)"
+          - event: "PolicyActivated(uint256 indexed policyId)"
+          - event: "PolicyExpired(uint256 indexed policyId)"
+
+      - name: PayoutModule
+        address:
+          - "0x0000000000000000000000000000000000000000" # Replace with actual address
+        handler: src/handlers/payoutModule.ts
+        events:
+          - event: "ClaimExecuted(uint256 indexed policyId, address indexed beneficiary, uint256 payout)"
+          - event: "ClaimFailed(uint256 indexed policyId, string reason)"
+
+      - name: ReservePool
+        address:
+          - "0x0000000000000000000000000000000000000000" # Replace with actual address
+        handler: src/handlers/reservePool.ts
+        events:
+          - event: "Deposited(address indexed user, uint256 amount, uint256 shares)"
+          - event: "Withdrawn(address indexed user, uint256 amount, uint256 shares)"
+          - event: "RedemptionQueued(address indexed user, uint256 shares, uint256 timestamp)"
+
+  - id: 1 # Ethereum mainnet
+    start_block: 0
+    contracts:
+      - name: PolicyDistributor
+        address:
+          - "0x0000000000000000000000000000000000000000"
+        handler: src/handlers/policyDistributor.ts
+        events:
+          - event: "PolicyMinted(uint256 indexed policyId, address indexed owner, bytes32 indexed riskId, uint256 insuredAmount, uint256 coverageCap, uint256 startAt, uint256 endAt)"
+          - event: "PolicyActivated(uint256 indexed policyId)"
+          - event: "PolicyExpired(uint256 indexed policyId)"
+
+# Database schema
+schema:
+  file: schema.graphql
+
+# Optional: Configure event handlers
+handlers:
+  - name: policyDistributor
+    kind: ethereum/events
+    apiVersion: 0.0.5
+    language: javascript/typescript
+    entities:
+      - Policy
+      - PolicyHolder
+      - RiskPool
+    abis:
+      - name: PolicyDistributor
+        file: ./abis/PolicyDistributor.json
+
+  - name: payoutModule
+    kind: ethereum/events
+    apiVersion: 0.0.5
+    language: javascript/typescript
+    entities:
+      - Claim
+      - Policy
+    abis:
+      - name: PayoutModule
+        file: ./abis/PayoutModule.json
+
+  - name: reservePool
+    kind: ethereum/events
+    apiVersion: 0.0.5
+    language: javascript/typescript
+    entities:
+      - ReserveDeposit
+      - ReserveWithdrawal
+      - RedemptionQueue
+    abis:
+      - name: ReservePool
+        file: ./abis/ReservePool.json
