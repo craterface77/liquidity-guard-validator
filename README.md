@@ -56,7 +56,7 @@ After a minute or two, the indexer will have fetched some samples and you'll see
 
 ## Configuration
 
-Pool monitoring is configured via environment variables. The default setup watches the Curve USDC/USDf pool at `0x72310daaed61321b02b08a547150c07522c6a976`.
+Pool monitoring is configured via environment variables. The default setup watches the Curve USDC/PYUSD pool at `0x72310daaed61321b02b08a547150c07522c6a976`.
 
 Key thresholds:
 
@@ -121,7 +121,7 @@ Request body:
   "policy": {
     "policyId": "1",
     "product": "DEPEG_LP",
-    "riskId": "curve-usdc-usdf|1720425600",
+    "riskId": "curve-usdc-pyusd|1720425600",
     "owner": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
     "insuredAmount": "1000000000000000000000000",
     "coverageCap": "800000000000000000000000",
@@ -131,7 +131,7 @@ Request body:
     "activeAt": 1720425600,
     "endAt": 1720512000,
     "claimedUpTo": 0,
-    "metadata": { "poolId": "curve-usdc-usdf" }
+    "metadata": { "poolId": "curve-usdc-pyusd" }
   },
   "claimMode": "PREVIEW"
 }

@@ -129,19 +129,15 @@ export class CurveIndexer {
   }
 
   private async getExchangeRate(dec0: number, dec1: number): Promise<number> {
-    // Get price: how much coin1 (QUOTE/USDC) for 1 unit of coin0 (BASE/USDF)
     const oneUnit = parseUnits("1", dec0);
 
     for (const signature of GET_DY_SIGNATURES) {
       const iface = new Interface([signature]);
       const fragment = iface.fragments[0] as FunctionFragment;
       try {
-        // get_dy(i, j, dx): swap coin i -> coin j
-        // We want: coin0 -> coin1 (BASE -> QUOTE, USDF -> USDC)
         const data = iface.encodeFunctionData(fragment, [0, 1, oneUnit]);
         const raw = await this.provider.call({ to: env.POOL_ADDRESS, data });
         const [amountOut] = iface.decodeFunctionResult(fragment, raw);
-        // This gives us how much coin1 we get for 1 coin0
         return Number(formatUnits(amountOut, dec1));
       } catch (error) {
         continue;
